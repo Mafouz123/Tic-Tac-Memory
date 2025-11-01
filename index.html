@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic-Tac-Memory</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .cell {
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
+      background: white;
+      border: 2px solid #ccc;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cell.revealed {
+      cursor: default;
+      background: #e0ffe0;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 Tic-Tac-Memory 🧠</h1>
+  <div id="board"></div>
+  <div id="message"></div>
+
+  <script>
+    const emojis = ['🍎','🍌','🍇','🍓','🍒'];
+    let board = [];
+    let revealed = [];
+    let matched = [];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function initBoard() {
+      const pairs = [...emojis, ...emojis].slice(0, 9);
+      board = shuffle(pairs);
+      const boardDiv = document.getElementById('board');
+      boardDiv.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        cell.addEventListener('click', handleClick);
+        boardDiv.appendChild(cell);
+      }
+    }
+
+    function handleClick(e) {
+      const index = e.target.dataset.index;
+      if (revealed.includes(index) || matched.includes(index)) return;
+
+      e.target.textContent = board[index];
+      e.target.classList.add('revealed');
+      revealed.push(index);
+
+      if (revealed.length === 2) {
+        const [i1, i2] = revealed;
+        if (board[i1] === board[i2]) {
+          matched.push(i1, i2);
+          document.getElementById('message').textContent = '✅ Paire trouvée !';
+          checkWin();
+        } else {
+          document.getElementById('message').textContent = '❌ Pas une paire...';
+          setTimeout(() => {
+            document.querySelector(`[data-index="${i1}"]`).textContent = '';
+            document.querySelector(`[data-index="${i2}"]`).textContent = '';
+            document.querySelector(`[data-index="${i1}"]`).classList.remove('revealed');
+            document.querySelector(`[data-index="${i2}"]`).classList.remove('revealed');
+          }, 800);
+        }
+        revealed = [];
+      }
+    }
+
+    function checkWin() {
+      if (matched.length === 6) {
+        document.getElementById('message').textContent = '🎉 Bravo ! Tu as gagné !';
+      }
+    }
+
+    initBoard();
+  </script>
+</body>
+</html>
